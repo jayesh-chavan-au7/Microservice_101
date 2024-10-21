@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/order_service
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+  doc:
+    swagger-ui:
+      path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  trace:
+    http:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.poc.order_service: DEBUG
+
+server:
+  port: 8081
