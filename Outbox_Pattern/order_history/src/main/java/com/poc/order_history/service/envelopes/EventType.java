@@ -1,4 +1,4 @@
-package com.poc.order_service.model;
+package com.poc.order_history.service.envelopes;
 
 public enum EventType {
     ORDER_CREATED,

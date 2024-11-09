@@ -24,8 +24,18 @@ public class OrderOutbox {
     @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
-    @Column(name = "event_payload", nullable = false, columnDefinition = "TEXT")
-    private String eventPayload;
+    @Column(name = "order_amount")
+    private Long orderAmount;
+
+    @Column(name = "merchant_order_reference")
+    private String merchantOrderReference;
+
+    @Column(name = "merchant_id")
+    private String merchantId;
+
+    @Column(name = "pre_auth")
+    private boolean praAuth;
+
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Instant createdAt;
@@ -36,20 +46,24 @@ public class OrderOutbox {
     }
 
     @NotNull
-    public static OrderOutbox createOrderOutbox(String aggregateId, String eventPayload) {
+    public static OrderOutbox createOrderOutbox(String aggregateId, Long orderAmount, String merchantId, String merchantOrderReference) {
         OrderOutbox outbox = new OrderOutbox();
         outbox.setAggregateId(aggregateId);
         outbox.setEventType(EventType.ORDER_CREATED);
-        outbox.setEventPayload(eventPayload);
+        outbox.setOrderAmount(orderAmount);
+        outbox.setMerchantId(merchantId);
+        outbox.setMerchantOrderReference(merchantOrderReference);
         return outbox;
     }
 
     @NotNull
-    public static OrderOutbox updateOrderOutbox(String aggregateId, String eventPayload) {
+    public static OrderOutbox updateOrderOutbox(String aggregateId, Long orderAmount, String merchantId, String merchantOrderReference) {
         OrderOutbox outbox = new OrderOutbox();
         outbox.setAggregateId(aggregateId);
         outbox.setEventType(EventType.ORDER_UPDATED);
-        outbox.setEventPayload(eventPayload);
+        outbox.setOrderAmount(orderAmount);
+        outbox.setMerchantId(merchantId);
+        outbox.setMerchantOrderReference(merchantOrderReference);
         return outbox;
     }
 }

@@ -1,6 +1,5 @@
 package com.poc.order_service.service.orderService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.order_service.controller.request.CreateOrderRequest;
 import com.poc.order_service.controller.response.OrderResponse;
@@ -19,7 +18,6 @@ public class OrderCreationService {
 
     private final OrderRepository orderRepository;
     private final OrderOutboxRepository orderOutboxRepository;
-    private final ObjectMapper objectMapper;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest createOrderRequest) {
@@ -40,11 +38,13 @@ public class OrderCreationService {
 
     private void createOutboxForCreateEvent(Orders savedOrder) {
         try {
-            String eventPayload = objectMapper.writeValueAsString(savedOrder);
-            OrderOutbox outbox = OrderOutbox.createOrderOutbox(savedOrder.getOrderId(), eventPayload);
+            OrderOutbox outbox = OrderOutbox.createOrderOutbox(
+                    savedOrder.getOrderId(),
+                    savedOrder.getOrderAmount(),
+                    savedOrder.getMerchantId(),
+                    savedOrder.getMerchantOrderReference()
+            );
             orderOutboxRepository.save(outbox);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing order to JSON", e);
         } catch (Exception e) {
             throw new RuntimeException("Error saving outbox entry", e);
         }

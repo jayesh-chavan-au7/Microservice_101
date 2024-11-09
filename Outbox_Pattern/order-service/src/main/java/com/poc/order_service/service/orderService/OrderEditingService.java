@@ -1,6 +1,5 @@
 package com.poc.order_service.service.orderService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.order_service.controller.request.UpdateOrderAmountRequest;
 import com.poc.order_service.controller.response.OrderResponse;
@@ -20,7 +19,6 @@ public class OrderEditingService {
 
     private final OrderRepository orderRepository;
     private final OrderOutboxRepository orderOutboxRepository;
-    private final ObjectMapper objectMapper;
 
     @Transactional
     public OrderResponse updateOrderAmount(String orderId, UpdateOrderAmountRequest updateOrderAmountRequest) {
@@ -34,8 +32,6 @@ public class OrderEditingService {
         try {
             Orders order = orderRepository.findByOrderId(orderId)
                     .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
-
-            // Update the order amount
             order.setOrderAmount(updateOrderAmountRequest.getOrderAmount());
             return orderRepository.save(order);
         } catch (Exception e) {
@@ -45,11 +41,13 @@ public class OrderEditingService {
 
     private void createOutboxForUpdateEvent(Orders updatedOrder) {
         try {
-            String eventPayload = objectMapper.writeValueAsString(updatedOrder);
-            OrderOutbox outbox = OrderOutbox.updateOrderOutbox(updatedOrder.getOrderId(), eventPayload);
+            OrderOutbox outbox = OrderOutbox.updateOrderOutbox(
+                    updatedOrder.getOrderId(),
+                    updatedOrder.getOrderAmount(),
+                    updatedOrder.getMerchantId(),
+                    updatedOrder.getMerchantOrderReference()
+            );
             orderOutboxRepository.save(outbox);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing updated order to JSON", e);
         } catch (Exception e) {
             throw new RuntimeException("Error saving outbox entry for updated order", e);
         }
